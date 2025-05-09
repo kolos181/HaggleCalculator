@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oblivion Haggle Calculator</title>
+  <link rel="icon" type="image/png" href="https://icons.iconarchive.com/icons/th3-prophetman/game/256/Oblivion-icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      background-color: #1a202c; /* Dark background */
+      color: #e2e8f0; /* Light text */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column; /* Allow content to stack vertically */
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background-color: #2d3748; /* Slightly lighter dark */
+      padding: 30px;
+      border-radius: 12px; /* More rounded corners */
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      box-sizing: border-box; /* Include padding in width */
+      position: relative; /* Needed for absolute positioning of banner */
+      margin-bottom: 20px; /* Space before the footer text */
+    }
+    h1 {
+      text-align: center;
+      color: #4299e1; /* A blue accent */
+      margin-bottom: 20px;
+      font-size: 2em; /* Adjust size for the main title */
+    }
+
+    p {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .scroll-instruction {
+      font-weight: bold;
+      color: #63b3ed; /* A lighter blue to stand out */
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #4a5568; /* Border matches formula background */
+      border-radius: 8px;
+      background-color: #2d3748; /* Matches container background */
+      display: flex; /* Use flexbox for layout */
+      align-items: center;
+      flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    }
+    .input-group label {
+      display: inline-block;
+      width: 180px;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #e2e8f0; /* Light text */
+      flex-shrink: 0; /* Prevent shrinking */
+    }
+    .input-group input[type="number"] {
+      padding: 10px;
+      border: 1px solid #4a5568;
+      border-radius: 6px;
+      width: 100px; /* Adjust width */
+      background-color: #4a5568; /* Input background */
+      color: #e2e8f0; /* Input text color */
+      /* Remove default number input arrows */
+      -moz-appearance: textfield;
+      margin-right: 10px; /* Space between number input and search */
+      /* Add transition for highlight effect */
+      transition: background-color 0.4s ease-in-out;
+    }
+    .input-group input[type="number"]::-webkit-outer-spin-button,
+    .input-group input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .input-group input[type="text"] {
+      padding: 10px;
+      border: 1px solid #4a5568;
+      border-radius: 6px;
+      flex-grow: 1; /* Allow text input to grow */
+      background-color: #4a5568;
+      color: #e2e8f0;
+    }
+
+    .mobile-instruction {
+      display: none; /* Hidden by default */
+      text-align: center;
+      color: #a0aec0; /* A subtle color */
+      font-size: 0.9em;
+      margin-bottom: 5px; /* Space below the instruction */
+    }
+
+    /* Style for the merchant luck info text */
+    .luck-info {
+      text-align: center;
+      font-size: 0.9em;
+      color: #a0aec0; /* Subtle color */
+      margin-top: -10px; /* Pull it up closer to the input group */
+      margin-bottom: 15px; /* Space below the instruction */
+    }
+
+
+    #result {
+      margin-top: 25px;
+      font-size: 1.8em; /* Increased font size */
+      font-weight: bold;
+      text-align: center;
+      color: #63b3ed; /* A lighter blue */
+    }
+
+    .slider-info {
+      text-align: center;
+      font-size: 0.9em;
+      color: #a0aec0; /* Subtle color */
+      margin-top: 5px; /* Space above this text */
+    }
+
+    /* --- Notification Banner Styles --- */
+    .update-banner {
+      background-color: #48bb78; /* Greenish background */
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      position: relative; /* Needed for close button positioning */
+      font-size: 0.9em;
+    }
+    .update-banner .close-btn {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.2em;
+    }
+
+    /* --- Highlight Class for Merchant Skill --- */
+    .highlight-ms {
+      background-color: #f6e05e !important; /* Yellowish highlight */
+      color: #2d3748 !important; /* Dark text on highlight */
+    }
+
+    /* --- Feedback Text Styles --- */
+    .feedback-text {
+      text-align: center;
+      font-size: 0.9em;
+      color: #a0aec0; /* Subtle color */
+      margin-top: 20px; /* Space above feedback text */
+    }
+    .feedback-text a {
+      color: #63b3ed; /* Link color */
+      text-decoration: none; /* No underline by default */
+    }
+    .feedback-text a:hover {
+      text-decoration: underline; /* Underline on hover */
+    }
+
+
+    /* --- Mobile Styles --- */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px; /* Reduce padding on body */
+      }
+      .container {
+        padding: 20px; /* Reduce padding on container */
+        border-radius: 8px; /* Slightly less rounded corners */
+        margin-bottom: 15px; /* Reduce bottom margin on mobile */
+      }
+      h1 {
+        font-size: 1.6em; /* Smaller title on mobile */
+        margin-bottom: 15px;
+      }
+      .scroll-instruction {
+        display: none; /* Hide scroll tip on mobile */
+      }
+      .mobile-instruction {
+        display: block;
+      }
+      .input-group {
+        flex-direction: column; /* Stack items vertically */
+        align-items: stretch; /* Stretch items to fill width */
+      }
+      .input-group label {
+        width: auto; /* Auto width for label */
+        margin-bottom: 8px; /* More space below label */
+      }
+      .input-group input[type="number"],
+      .input-group input[type="text"] {
+        width: 100%; /* Full width inputs */
+        margin-right: 0; /* Remove margin */
+        margin-bottom: 10px; /* Space between inputs in group */
+        box-sizing: border-box; /* Include padding and border in width */
+      }
+      .input-group input[type="text"] {
+        margin-bottom: 0; /* No bottom margin for the last input in group */
+      }
+      #result {
+        font-size: 1.4em; /* Slightly larger on mobile than previous, but still smaller than desktop */
+        margin-top: 20px;
+      }
+      .slider-info {
+        font-size: 0.8em; /* Even smaller on mobile */
+      }
+      .luck-info {
+        font-size: 0.8em; /* Even smaller on mobile */
+      }
+      .update-banner {
+        font-size: 0.8em; /* Smaller banner text on mobile */
+        padding: 8px;
+      }
+      .feedback-text {
+        font-size: 0.8em; /* Smaller feedback text on mobile */
+        margin-top: 15px; /* Adjust margin on mobile */
+      }
+    }
+  </style>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-2MW93X122N"></script>
+      <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2MW93X122N');
+</script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3867818606337156"
+          crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="update-banner" id="updateBanner">
+    The merchant list has been updated with a more complete selection of vendors from across Oblivion!
+    <span class="close-btn" onclick="dismissBanner()">&times;</span>
+  </div>
+
+  <h1>Oblivion Haggle Calculator</h1>
+
+  <p>Enter the values below to calculate the Best Slider Position.</p>
+  <p class="scroll-instruction">💡 Tip: Hover over an input field and use your mouse scroll wheel to change the value.</p>
+
+  <div class="input-group">
+    <label for="disposition">Disposition:</label>
+    <input type="number" id="disposition" value="70">
+  </div>
+
+  <div class="input-group">
+    <label for="playerSkill">Player Skill:</label>
+    <input type="number" id="playerSkill" value="30">
+  </div>
+
+  <div class="input-group">
+    <label for="merchantSkill">Merchant Skill:</label>
+    <input type="number" id="merchantSkill" value="40">
+    <p class="mobile-instruction">Start typing merchant's name, or select from the list:</p>
+    <input type="text" id="merchantSearch" list="merchantList" placeholder="Search Merchant">
+    <datalist id="merchantList"></datalist>
+  </div>
+
+  <div class="input-group">
+    <label for="playerLuck">Player Luck:</label>
+    <input type="number" id="playerLuck" value="50">
+  </div>
+
+  <div class="input-group">
+    <label for="merchantLuck">Merchant Luck:</label>
+    <input type="number" id="merchantLuck" value="50">
+  </div>
+  <p class="luck-info">Almost all merchants in Oblivion have 50 Luck.</p>
+
+  <div id="result"></div>
+  <p class="slider-info">The haggle slider has 40 positions, with 20 being the center point.</p>
+</div>
+
+<p class="feedback-text">
+  Send your feedback and suggestions to <a href="mailto:feedback@tamrieltools.com">feedback@tamrieltools.com</a>
+</p>
+
+<script>
+  // Merchant data (Name and Mercantile Skill)
+  const merchantsData = [
+    // Anvil
+    { name: "Dahlia Rackham", mercantile: 56 },
+    { name: "Enilroth", mercantile: 30 },
+    { name: "Felen Relas", mercantile: 30 },
+    { name: "Maenlorn", mercantile: 30 },
+    { name: "Norbert Lelles", mercantile: 40 },
+    { name: "Orrin", mercantile: 90 },
+    { name: "Varel Morvayn", mercantile: 40 },
+    { name: "Wilbur", mercantile: 30 },
+    // Bravil
+    { name: "Ardaline", mercantile: 40 },
+    { name: "Bogrum gro-Galash", mercantile: 30 },
+    { name: "Daenlin", mercantile: 40 },
+    { name: "Gilgondorin", mercantile: 40 },
+    { name: "Luciana Galena", mercantile: 80 },
+    { name: "Nilawen", mercantile: 40 },
+    { name: "Nordinor", mercantile: 30 },
+    { name: "Tadrose Helas", mercantile: 30 },
+    { name: "Ungarion", mercantile: 40 },
+    // Bruma
+    { name: "Fjotreid", mercantile: 40 },
+    { name: "Hafid Hollowleg", mercantile: 40 },
+    { name: "Karinnarre", mercantile: 60 },
+    { name: "Olav", mercantile: 30 }, // Name confirmed as Olav per UESP [1]
+    { name: "Olfand", mercantile: 60 },
+    { name: "Ongar the World-Weary", mercantile: 60 },
+    { name: "Selena Orania", mercantile: 40 },
+    { name: "Skjorta", mercantile: 60 },
+    { name: "Suurootan", mercantile: 36 },
+    // Cheydinhal
+    { name: "Borba gra-Uzgash", mercantile: 60 },
+    { name: "Dark Brotherhood Murderer Mage", mercantile: 5 },
+    { name: "Dervera Romalen", mercantile: 30 },
+    { name: "Eilonwy", mercantile: 40 },
+    { name: "M'raaj-Dar", mercantile: 6 },
+    { name: "Mach-Na", mercantile: 80 },
+    { name: "Magra gro-Naybek", mercantile: 30 },
+    { name: "Mariana Ancharia", mercantile: 40 },
+    { name: "Tertia Viducia", mercantile: 60 },
+    // Chorrol
+    { name: "Angalmo", mercantile: 40 },
+    { name: "Emfrid", mercantile: 30 },
+    { name: "Estelle Renoit", mercantile: 30 },
+    { name: "Rasheda", mercantile: 80 },
+    { name: "Sabine Laul", mercantile: 30 },
+    { name: "Seed-Neeus", mercantile: 40 },
+    { name: "Talasma", mercantile: 40 },
+    // Imperial City
+    { name: "Augusta Calidia", mercantile: 30 },
+    { name: "Aurelinwae", mercantile: 6 }, // DLC: Wizard's Tower
+    { name: "Calindil", mercantile: 60 },
+    { name: "Claudette Perrick", mercantile: 80 },
+    { name: "Delos Fandas", mercantile: 40 },
+    { name: "Edgar Vautrine", mercantile: 40 },
+    { name: "Ernest Manis", mercantile: 30 },
+    { name: "Fathis Ules", mercantile: 100 }, // Thieves Guild Fence
+    { name: "Hamlof Red-Tooth", mercantile: 40 },
+    { name: "Jensine", mercantile: 30 },
+    { name: "Julienne Fanis", mercantile: 80 },
+    { name: "Ley Marillin", mercantile: 40 },
+    { name: "Luther Broad", mercantile: 40 },
+    { name: "Maro Rufus", mercantile: 40 },
+    { name: "Nilphas Omellian", mercantile: 40 }, // DLC: Fighter's Stronghold
+    { name: "Ogier Georick", mercantile: 40 },
+    { name: "Ormil", mercantile: 40 },
+    { name: "Palonirya", mercantile: 80 },
+    { name: "Phintias", mercantile: 80 },
+    { name: "Rindir", mercantile: 30 },
+    { name: "Rohssan", mercantile: 80 },
+    { name: "Sergius Verus", mercantile: 60 },
+    { name: "Shady Sam", mercantile: 51 },
+    { name: "Tertullian Verus", mercantile: 60 },
+    { name: "Thoronir", mercantile: 40 },
+    { name: "Urbul gro-Orkulg", mercantile: 40 },
+    { name: "Varnado", mercantile: 60 },
+    { name: "Velus Hosidius", mercantile: 60 },
+    { name: "Viator Accius", mercantile: 60 },
+    { name: "Willet", mercantile: 40 },
+    // Kvatch (Post-Liberation)
+    { name: "Batul gra-Sharob", mercantile: 100 },
+    { name: "Sigrid", mercantile: 100 },
+    // Leyawiin
+    { name: "Alves Uvenim", mercantile: 40 },
+    { name: "Bugak gro-Bol", mercantile: 60 },
+    { name: "Dar Jee", mercantile: 70 },
+    { name: "Elsynia", mercantile: 60 },
+    { name: "Gundalas", mercantile: 60 },
+    { name: "S'drassa", mercantile: 6 },
+    { name: "Shuravi", mercantile: 40 },
+    { name: "Tun-Zeeus", mercantile: 40 },
+    { name: "Witseidutsei", mercantile: 30 },
+    // Skingrad
+    { name: "Agnete the Pickled", mercantile: 80 },
+    { name: "Erina Jeranus", mercantile: 40 },
+    { name: "Falanu Hlaalu", mercantile: 40 },
+    { name: "Gunder", mercantile: 40 },
+    { name: "Mog gra-Mogakh", mercantile: 30 },
+    { name: "Sinderion", mercantile: 8 },
+    // Other Locations
+    { name: "Abhuki", mercantile: 80 }, // Aleswell
+    { name: "Andreas Draconis", mercantile: 50 }, // Dragon Claw Rock (Knights of the Nine)
+    { name: "Candice Corgine", mercantile: 30 }, /* Leveled */ // Gottlesfont Priory (Knights of the Nine)
+    { name: "Christophe Marane", mercantile: 50 }, // Brindle Home
+    { name: "Davela Hlaren", mercantile: 50 }, // Weatherleah
+    { name: "Engorm", mercantile: 25 }, /* Leveled */ // Roland Jenseric's Cabin (Knights of the Nine)
+    { name: "Etira Moslin", mercantile: 100 }, // Hackdirt
+    { name: "Foroch", mercantile: 50 }, // Gottlesfont Priory
+    { name: "Jak Silver", mercantile: 5 }, // Anvil Castle (Thieves Guild)
+    { name: "Khafiz", mercantile: 48 }, // Dunbarrow Cove (Thieves Guild)
+    { name: "Kirsten", mercantile: 30 }, /* Leveled */ // Bleak Mine (Malacath Shrine Quest)
+    { name: "Kovan Kren", mercantile: 5 }, // Dzonot Cave (Dark Brotherhood)
+    { name: "Malene", mercantile: 50 }, // Roxey Inn
+    { name: "Manheim Maulhand", mercantile: 30 }, // Inn of Ill Omen
+    { name: "Melliwin", mercantile: 6 }, // Lord Drad's Estate
+    { name: "Nerussa", mercantile: 30 }, /* Leveled */ // Wawnet Inn
+    { name: "Niels", mercantile: 40 }, // The Dividing Line (Leyawiin Mages Guild Recommendation)
+    { name: "Rowley Eardwulf", mercantile: 44 }, // Wawnet Inn (DLC: Vile Lair)
+    { name: "S'thasa", mercantile: 30 }, /* Leveled */ // Bravil Mages Guild (Recommendation Quest)
+    { name: "Sergius Turrianus", mercantile: 20 }, // Summitmist Manor (Dark Brotherhood)
+    { name: "Tahm Blackwell", mercantile: 44 }, // Battlehorn Castle Barracks (DLC: Fighter's Stronghold)
+    { name: "Vlanhonder Moslin", mercantile: 40 }, /* Leveled */ // Hackdirt
+
+    // Shivering Isles Merchants (Source: UESP [2])
+    // Bliss
+    { name: "Dumag gro-Bonk", mercantile: 34 },
+    { name: "Raven Biter", mercantile: 44 },
+    { name: "Sontaire", mercantile: 34 },
+    { name: "Tilse Areleth", mercantile: 44 },
+    // Crucible
+    { name: "Ahjazda", mercantile: 6 },
+    { name: "Cutter", mercantile: 34 },
+    { name: "Earil", mercantile: 6 },
+    { name: "Sickly Bernice", mercantile: 44 },
+    // Passwall
+    { name: "Dredhwen", mercantile: 50 }
+
+  ];
+
+  // Sort merchants data alphabetically by name
+  merchantsData.sort((a, b) => a.name.localeCompare(b.name));
+
+
+  // Function to add scroll wheel functionality to an input element
+  function addScrollWheel(inputElement) {
+    inputElement.addEventListener('wheel', function(event) {
+      // Only apply to number inputs
+      if (inputElement.type !== 'number') {
+        return;
+      }
+
+      event.preventDefault(); // Prevent default page scroll
+
+      let currentValue = parseFloat(inputElement.value);
+      if (isNaN(currentValue)) {
+        currentValue = 0; // Default to 0 if input is empty or not a number
+      }
+
+      // Determine scroll direction and change value
+      if (event.deltaY < 0) {
+        // Scrolling up
+        inputElement.value = currentValue + 1;
+      } else {
+        // Scrolling down
+        inputElement.value = currentValue - 1;
+      }
+
+      // Trigger calculation immediately after changing value
+      calculateSliderPosition();
+    });
+  }
+
+  // Function to calculate and display the Best Slider Position
+  function calculateSliderPosition() {
+    const disposition = parseFloat(document.getElementById('disposition').value);
+    const playerSkill = parseFloat(document.getElementById('playerSkill').value);
+    const merchantSkill = parseFloat(document.getElementById('merchantSkill').value); // Read from MS field
+    const playerLuck = parseFloat(document.getElementById('playerLuck').value);
+    const merchantLuck = parseFloat(document.getElementById('merchantLuck').value);
+
+    // Validate inputs - check if any required field is empty or not a number
+    if (isNaN(disposition) || isNaN(playerSkill) || isNaN(merchantSkill) || isNaN(playerLuck) || isNaN(merchantLuck)) {
+      // Clear the result if inputs are invalid
+      document.getElementById('result').innerText = "Please enter valid numbers for all fields.";
+      return;
+    }
+
+    // Calculate using the full formula
+    const disposition_term = Math.floor(0.4 * (disposition - 10) / 4);
+
+    const player_luck_mod = 0.4 * (playerLuck - 50);
+    const merchant_luck_mod = 0.4 * (merchantLuck - 50);
+
+    const player_skill_part = Math.min(playerSkill + player_luck_mod, 100);
+    const merchant_skill_part = Math.min(merchantSkill + merchant_luck_mod, 100);
+
+    const skill_luck_term = (100 + player_skill_part - merchant_skill_part) / 10;
+
+    const inside_floor = (0.5 * disposition_term + skill_luck_term) / 0.55;
+
+    const bestSliderPosition = Math.floor(inside_floor);
+
+    document.getElementById('result').innerText = "Best Slider Position: " + bestSliderPosition;
+  }
+
+  // Function to dismiss the update banner and set local storage
+  function dismissBanner() {
+    const banner = document.getElementById('updateBanner');
+    if (banner) {
+      banner.style.display = 'none';
+      localStorage.setItem('oblivionHaggleBannerDismissed', 'true');
+    }
+  }
+
+  // Add scroll wheel functionality to all number input fields
+  document.addEventListener('DOMContentLoaded', function() {
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(addScrollWheel);
+
+    // Also trigger calculation when number input values change by typing
+    numberInputs.forEach(input => {
+      input.addEventListener('input', calculateSliderPosition);
+    });
+
+    // Populate the datalist with sorted merchant names
+    const merchantList = document.getElementById('merchantList');
+    merchantsData.forEach(merchant => {
+      const option = document.createElement('option');
+      option.value = merchant.name;
+      merchantList.appendChild(option);
+    });
+
+    // Add event listener to the merchant search input
+    const merchantSearchInput = document.getElementById('merchantSearch');
+    const merchantSkillInput = document.getElementById('merchantSkill');
+
+    // Add focus listener to clear the search field if it contains text
+    merchantSearchInput.addEventListener('focus', function() {
+      // Clear the field on focus if it's not empty
+      if (this.value !== '') {
+        this.value = '';
+      }
+      // Note: Datalist suggestions should appear automatically on focus/input change in most browsers
+    });
+
+    // Add a click listener to also clear the field and potentially prompt the datalist
+    merchantSearchInput.addEventListener('click', function() {
+      // Clear the field on click if it's not empty
+      // This might help trigger the datalist in some browsers
+      if (this.value !== '') {
+        this.value = '';
+      }
+    });
+
+
+    merchantSearchInput.addEventListener('input', function() {
+      const selectedMerchantName = this.value;
+      const foundMerchant = merchantsData.find(merchant => merchant.name === selectedMerchantName);
+
+      if (foundMerchant) {
+        // If a merchant is found in the list, update the Merchant Skill input
+        merchantSkillInput.value = foundMerchant.mercantile;
+        calculateSliderPosition(); // Recalculate with the new MS value
+
+        // --- Add highlight effect ---
+        merchantSkillInput.classList.add('highlight-ms');
+        // Remove highlight after a short delay
+        setTimeout(() => {
+          merchantSkillInput.classList.remove('highlight-ms');
+        }, 1000); // Highlight for 1 second
+        // --- End highlight effect ---
+
+      } else {
+        // If the input doesn't match a merchant name, the user might be typing a custom name
+        // We don't want to clear the MS field in this case, as they might be manually entering a value
+        // The calculateSliderPosition function already reads from merchantSkillInput
+      }
+    });
+
+    // Check if the banner has been dismissed before showing it
+    const bannerDismissed = localStorage.getItem('oblivionHaggleBannerDismissed');
+    if (!bannerDismissed) {
+      const banner = document.getElementById('updateBanner');
+      if (banner) {
+        banner.style.display = 'block'; // Show the banner
+      }
+    } else {
+      const banner = document.getElementById('updateBanner');
+      if (banner) {
+        banner.style.display = 'none'; // Ensure it's hidden if dismissed
+      }
+    }
+
+
+    // Perform an initial calculation when the page loads
+    calculateSliderPosition();
+  });
+</script>
+
+</body>
+</html>
